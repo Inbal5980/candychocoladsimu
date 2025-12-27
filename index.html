@@ -20,7 +20,7 @@
             justify-content: center;
             align-items: center;
             padding: 2vmin;
-            overflow: hidden; /* מונע גלילה כדי לשמור על יחס מסך */
+            overflow: hidden;
         }
 
         .container {
@@ -29,8 +29,8 @@
             padding: 3vmin;
             width: 100%;
             height: 100%;
-            max-width: 177.78vh; /* שומר על יחס 16:9 ביחס לגובה */
-            max-height: 56.25vw; /* שומר על יחס 16:9 ביחס לרוחב */
+            max-width: 177.78vh;
+            max-height: 56.25vw;
             aspect-ratio: 16/9;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             border: 1vmin solid #8B4513;
@@ -140,6 +140,7 @@
             padding: 2vmin;
             flex-grow: 1;
             overflow-y: auto;
+            position: relative;
         }
 
         .chocolate-cube {
@@ -168,9 +169,8 @@
             border-radius: 0.5vmin;
         }
 
-        .new-chocolate {
-            animation: newChocolate 0.5s ease-out;
-            border-color: #FFD700; /* זהב לקוביות חדשות */
+        .melting-chocolate {
+            animation: meltAnimation 1s ease-out forwards;
         }
 
         @keyframes fallIn {
@@ -178,10 +178,36 @@
             to { transform: translateY(0) rotate(0); opacity: 1; }
         }
 
-        @keyframes newChocolate {
-            0% { transform: scale(0) rotate(0deg); opacity: 0; }
-            50% { transform: scale(1.3) rotate(180deg); }
-            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        @keyframes meltAnimation {
+            0% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(0.8) translateY(2vmin);
+                opacity: 0.7;
+                filter: blur(1px);
+            }
+            100% {
+                transform: scale(0.3) translateY(5vmin);
+                opacity: 0;
+            }
+        }
+
+        .melted-puddle {
+            position: absolute;
+            bottom: 1vmin;
+            width: 15vmin;
+            height: 8vmin;
+            background: radial-gradient(ellipse at center, #6F4E37 0%, #4B2C20 50%, transparent 80%);
+            border-radius: 50%;
+            opacity: 0;
+            animation: puddleAppear 0.8s ease-out 0.8s forwards;
+        }
+
+        @keyframes puddleAppear {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 0.6; transform: scale(1); }
         }
 
         .btn {
@@ -197,14 +223,14 @@
             width: 100%;
         }
 
-        .btn-add {
-            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+        .btn-melt {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
             color: white;
-            border: 0.3vmin solid #654321;
+            border: 0.3vmin solid #CC5500;
         }
 
-        .btn-add:hover:not(:disabled) {
-            background: linear-gradient(135deg, #A0522D 0%, #8B4513 100%);
+        .btn-melt:hover:not(:disabled) {
+            background: linear-gradient(135deg, #F7931E 0%, #FF6B35 100%);
             transform: translateY(-0.3vmin);
         }
 
@@ -277,18 +303,18 @@
                 <div class="story-box">
                     בְּמַעְבֶּדֶת הַשּׁוֹקוֹלָד הִתְחִיל הַנִּסּוּי עִם <strong>12 קֻבִּיּוֹת</strong>. 
                     <br><br>
-                    הַפְּרוֹפֵסוֹר מְבַקֵּשׁ לְהוֹסִיף עוֹד <strong>5 קֻבִּיּוֹת</strong>, אַחַת אַחַת.
+                    אוֹי לֹא! 😱 <strong>5 קֻבִּיּוֹת נָמַסּוּ</strong> עַל הָרִצְפָּה, אַחַת אַחַת!
                     <br><br>
-                    🤔 <strong>כַּמָּה יִהְיוּ בַּסּוֹף?</strong>
+                    🤔 <strong>כַּמָּה נִשְׁאֲרוּ?</strong>
                 </div>
 
                 <div class="controls">
                     <div>
-                        <button class="btn btn-add" id="addBtn" onclick="addOneChocolate()">
-                            ➕ הוֹסֵף קֻבִּיָּה אַחַת
+                        <button class="btn btn-melt" id="meltBtn" onclick="meltOneChocolate()">
+                            💧 הַמֵּס קֻבִּיָּה אַחַת
                         </button>
                         <div class="progress-indicator" id="progressText">
-                            הוֹסַפְתָּ 0 מִתּוֹךְ 5 קֻבִּיּוֹת
+                            נָמַסּוּ 0 מִתּוֹךְ 5 קֻבִּיּוֹת
                         </div>
                     </div>
                     <button class="btn btn-reset" onclick="reset()">
@@ -304,7 +330,7 @@
                             סַהַ"כּ: <span id="counter">12</span> 🍫
                         </div>
                         <div class="equation-display" id="equation">
-                            12 + <span id="addedCount">0</span> = ?
+                            12 - <span id="meltedCount">0</span> = ?
                         </div>
                     </div>
 
@@ -314,18 +340,19 @@
         </div>
 
         <div class="professor-message" id="message">
-            👨‍🔬 קָדִימָה! לַחֲצוּ עַל הַכַּפְתּוֹר כְּדֵי לְהוֹסִיף אֶת הַקֻּבִּיָּה הָרִאשׁוֹנָה!
+            👨‍🔬 אוֹי לֹא! לַחֲצוּ עַל הַכַּפְתּוֹר לִרְאוֹת אֵיךְ קֻבִּיָּה נָמֵסָה!
         </div>
     </div>
 
     <script>
         let baseCount = 12;
-        let currentAdded = 0;
-        const targetAdded = 5;
+        let currentMelted = 0;
+        const targetMelted = 5;
+        let chocolateCubes = [];
 
-        function createChocolate(isNew = false) {
+        function createChocolate() {
             const cube = document.createElement('div');
-            cube.className = 'chocolate-cube' + (isNew ? ' new-chocolate' : '');
+            cube.className = 'chocolate-cube';
             cube.textContent = '🍫';
             return cube;
         }
@@ -333,46 +360,74 @@
         function initializeChocolates() {
             const grid = document.getElementById('chocolateGrid');
             grid.innerHTML = '';
-            for (let i = 0; i < baseCount; i++) {
-                grid.appendChild(createChocolate());
+            chocolateCubes = [];
+            
+            const remaining = baseCount - currentMelted;
+            for (let i = 0; i < remaining; i++) {
+                const cube = createChocolate();
+                grid.appendChild(cube);
+                chocolateCubes.push(cube);
             }
-            // הוספת הקוביות החדשות אם יש (במקרה של רענון)
-            for (let i = 0; i < currentAdded; i++) {
-                grid.appendChild(createChocolate(true));
+            
+            // הוספת שלוליות שוקולד מומס
+            for (let i = 0; i < currentMelted; i++) {
+                const puddle = document.createElement('div');
+                puddle.className = 'melted-puddle';
+                puddle.style.left = `${10 + (i * 16)}%`;
+                grid.appendChild(puddle);
             }
         }
 
-        function addOneChocolate() {
-            if (currentAdded >= targetAdded) return;
+        function meltOneChocolate() {
+            if (currentMelted >= targetMelted || chocolateCubes.length === 0) return;
 
-            currentAdded++;
+            // בחירת קוביה אקראית להמסה
+            const randomIndex = Math.floor(Math.random() * chocolateCubes.length);
+            const cubeToMelt = chocolateCubes[randomIndex];
+            
+            // הוספת אנימציית המסה
+            cubeToMelt.classList.add('melting-chocolate');
+            
+            // הסרת הקוביה מהמערך
+            chocolateCubes.splice(randomIndex, 1);
+            
+            currentMelted++;
             
             // עדכון הממשק
-            const grid = document.getElementById('chocolateGrid');
             const counter = document.getElementById('counter');
-            const equationAdded = document.getElementById('addedCount');
+            const equationMelted = document.getElementById('meltedCount');
             const equation = document.getElementById('equation');
             const message = document.getElementById('message');
             const progressText = document.getElementById('progressText');
-            const addBtn = document.getElementById('addBtn');
+            const meltBtn = document.getElementById('meltBtn');
 
-            // הוספת קוביה
-            grid.appendChild(createChocolate(true));
-            
             // עדכון מספרים
-            counter.textContent = baseCount + currentAdded;
-            equationAdded.textContent = currentAdded;
-            progressText.textContent = `הוֹסַפְתָּ ${currentAdded} מִתּוֹךְ ${targetAdded} קֻבִּיּוֹת`;
+            const remaining = baseCount - currentMelted;
+            counter.textContent = remaining;
+            equationMelted.textContent = currentMelted;
+            progressText.textContent = `נָמַסּוּ ${currentMelted} מִתּוֹךְ ${targetMelted} קֻבִּיּוֹת`;
+
+            // הוספת שלולית אחרי 0.8 שניות
+            setTimeout(() => {
+                const grid = document.getElementById('chocolateGrid');
+                const puddle = document.createElement('div');
+                puddle.className = 'melted-puddle';
+                puddle.style.left = `${10 + ((currentMelted - 1) * 16)}%`;
+                grid.appendChild(puddle);
+                
+                // הסרת הקוביה הנמסה
+                cubeToMelt.remove();
+            }, 800);
 
             // בדיקת סיום
-            if (currentAdded === targetAdded) {
-                equation.innerHTML = `12 + 5 = <strong>17</strong>`;
-                message.innerHTML = '🎉 כָּל הַכָּבוֹד! הִגַּעְתֶּם ל-17 קֻבִּיּוֹת! 🎉';
-                addBtn.disabled = true;
-                addBtn.textContent = '✅ הַנִּסּוּי הֻשְׁלַם';
+            if (currentMelted === targetMelted) {
+                equation.innerHTML = `12 - 5 = <strong>7</strong>`;
+                message.innerHTML = '🎉 נָכוֹן! נִשְׁאֲרוּ 7 קֻבִּיּוֹת שׁוֹקוֹלָד! 🎉';
+                meltBtn.disabled = true;
+                meltBtn.textContent = '✅ הַנִּסּוּי הֻשְׁלַם';
                 showCelebration();
             } else {
-                message.textContent = `👨‍🔬 מְצֻיָּן! יֵשׁ לָנוּ עַכְשָׁו ${baseCount + currentAdded}. תַּמְשִׁיכוּ!`;
+                message.textContent = `👨‍🔬 אוֹי! נִשְׁאֲרוּ ${remaining} קֻבִּיּוֹת. הַמְשִׁיכוּ!`;
             }
         }
 
@@ -385,16 +440,16 @@
         }
 
         function reset() {
-            currentAdded = 0;
+            currentMelted = 0;
             document.getElementById('counter').textContent = '12';
-            document.getElementById('addedCount').textContent = '0';
-            document.getElementById('equation').innerHTML = '12 + <span id="addedCount">0</span> = ?';
-            document.getElementById('message').innerHTML = '👨‍🔬 קָדִימָה! לַחֲצוּ עַל הַכַּפְתּוֹר כְּדֵי לְהוֹסִיף אֶת הַקֻּבִּיָּה הָרִאשׁוֹנָה!';
-            document.getElementById('progressText').textContent = 'הוֹסַפְתָּ 0 מִתּוֹךְ 5 קֻבִּיּוֹת';
+            document.getElementById('meltedCount').textContent = '0';
+            document.getElementById('equation').innerHTML = '12 - <span id="meltedCount">0</span> = ?';
+            document.getElementById('message').innerHTML = '👨‍🔬 אוֹי לֹא! לַחֲצוּ עַל הַכַּפְתּוֹר לִרְאוֹת אֵיךְ קֻבִּיָּה נָמֵסָה!';
+            document.getElementById('progressText').textContent = 'נָמַסּוּ 0 מִתּוֹךְ 5 קֻבִּיּוֹת';
             
-            const addBtn = document.getElementById('addBtn');
-            addBtn.disabled = false;
-            addBtn.textContent = '➕ הוֹסֵף קֻבִּיָּה אַחַת';
+            const meltBtn = document.getElementById('meltBtn');
+            meltBtn.disabled = false;
+            meltBtn.textContent = '💧 הַמֵּס קֻבִּיָּה אַחַת';
             
             initializeChocolates();
         }
